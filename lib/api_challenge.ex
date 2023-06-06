@@ -2,7 +2,7 @@ defmodule ApiChallenge do
   use Agent
   use Tesla
 
-  plug Tesla.Middleware.JSON
+  # plug Tesla.Middleware.JSON
 
   def setup do
     {:ok, slc} = Agent.start(fn -> [] end)
@@ -19,9 +19,13 @@ defmodule ApiChallenge do
     url = url_constructor(loc)
 
     {:ok, %{status: 200, body: body}} = Tesla.get(url)
-    {:ok, %{status: "OK", results: results}} = Jason.decode(body)
-    IO.puts("Constructed URL: " <> url)
+    {:ok, decoded} = Jason.decode(body)
+    # IO.puts("Constructed URL: " <> url)
 
-    Agent.update(agent, fn list -> [results|list] end)
+    Agent.update(agent, fn list -> [decoded|list] end)
+    # IO.puts(Map.get(decoded, :current, "Not present"))
+    weather_map = decoded[0]
+    IO.puts(weather_map)
+    # IO.puts(Map.get(weather_map, :current, "still wrong"))
   end
 end
