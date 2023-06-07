@@ -20,12 +20,18 @@ defmodule ApiChallenge do
 
     {:ok, %{status: 200, body: body}} = Tesla.get(url)
     {:ok, decoded} = Jason.decode(body)
-    # IO.puts("Constructed URL: " <> url)
+    forecast = Map.get(decoded, "forecast")
+    forecastday = Map.get(forecast, "forecastday")
+    day_1 = List.first(forecastday)
+    day_1_cond = Map.get(day_1, "day")
+    day_1_max = Map.get(day_1_cond, "maxtemp_f")
+    IO.puts("Max temperature on " <> Map.get(day_1, "date") <> " is " <> Float.to_string(day_1_max) <> " degrees Fahrenheit.")
 
     Agent.update(agent, fn list -> [decoded|list] end)
-    # IO.puts(Map.get(decoded, :current, "Not present"))
-    weather_map = decoded[0]
-    IO.puts(weather_map)
+    # %{"current" => :current} = Map.get(decoded, "current", "not present")
+    # IO.puts(:current)
+    # weather_map = decoded[0]
+    # IO.puts(weather_map)
     # IO.puts(Map.get(weather_map, :current, "still wrong"))
   end
 end
