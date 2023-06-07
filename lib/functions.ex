@@ -1,8 +1,6 @@
-defmodule ApiChallenge do
+defmodule Functions do
   use Agent
   use Tesla
-
-  # plug Tesla.Middleware.JSON
 
   def setup do
     {:ok, slc} = Agent.start(fn -> [] end)
@@ -16,22 +14,27 @@ defmodule ApiChallenge do
   end
 
   def api_call(agent, loc) do
+    loc_string = String.replace(loc, "_", " ")
     url = url_constructor(loc)
 
     {:ok, %{status: 200, body: body}} = Tesla.get(url)
     {:ok, decoded} = Jason.decode(body)
+
     forecast = Map.get(decoded, "forecast")
     forecastday = Map.get(forecast, "forecastday")
     day_1 = List.first(forecastday)
+    day_2 = Enum.at(forecastday, 1, "NOPE@1")
+    day_3 = Enum.at(forecastday, 2, "NOPE@2")
     day_1_cond = Map.get(day_1, "day")
-    day_1_max = Map.get(day_1_cond, "maxtemp_f")
-    IO.puts("Max temperature on " <> Map.get(day_1, "date") <> " is " <> Float.to_string(day_1_max) <> " degrees Fahrenheit.")
+    day_2_cond = Map.get(day_2, "day")
+    day_3_cond = Map.get(day_3, "day")
+    day_1_max_temp = Map.get(day_1_cond, "maxtemp_f")
+    day_2_max_temp = Map.get(day_2_cond, "maxtemp_f")
+    day_3_max_temp = Map.get(day_3_cond, "maxtemp_f")
+    temp_avg = (day_1_max_temp + day_2_max_temp + day_3_max_temp)/3
+
+    IO.puts("The average max temperature over the next three days in " <> loc_string <> " is " <> Float.to_string(temp_avg) <> " degrees Fahrenheit.")
 
     Agent.update(agent, fn list -> [decoded|list] end)
-    # %{"current" => :current} = Map.get(decoded, "current", "not present")
-    # IO.puts(:current)
-    # weather_map = decoded[0]
-    # IO.puts(weather_map)
-    # IO.puts(Map.get(weather_map, :current, "still wrong"))
   end
 end
